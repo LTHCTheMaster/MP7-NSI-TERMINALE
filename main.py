@@ -94,29 +94,29 @@ class Case:
 ###########
 # WARNING: make sure to use python 3.10
 ###########
-
-# Map Loader
-def map_loader(path: str) -> tuple[list[list[Case]],str,tuple[int, int], tuple[int, int]]:
-    # Charge une carte en chargeant sa grille, son nom et ses points d'entrée et de sortie
-    out_map: list[list[Case]] = []
-    file = open(path, 'r+')
-    file.write('')
-    name = file.readline()[9:].replace('\n','')
-    map_raw = file.readlines()
-    for i in map_raw:
-        add = []
-        for j in i.replace('\n',''):
-            add.append(Case(j))
-        out_map.append(add.copy())
-    origin_point = None
-    exit_point = None
-    for i in range(len(out_map)):
-        for j in range(len(out_map[i])):
-            if out_map[i][j].isOrigin():
-                origin_point = (i, j)
-            if out_map[i][j].isExit():
-                exit_point = (i, j)
-    return (out_map, name, origin_point, exit_point)
+class Map:
+    def __init__(self, path: str):
+        # Charge une carte en chargeant sa grille, son nom et ses points d'entrée et de sortie
+        self.out_map: list[list[Case]] = []
+        file = open(path, 'r+')
+        file.write('')
+        self.name = file.readline()[9:].replace('\n','')
+        map_raw = file.readlines()
+        for i in map_raw:
+            add = []
+            for j in i.replace('\n',''):
+                add.append(Case(j))
+            self.out_map.append(add.copy())
+        self.origin_point = None
+        self.exit_point = None
+        for i in range(len(self.out_map)):
+            for j in range(len(self.out_map[i])):
+                if self.out_map[i][j].isOrigin():
+                    self.origin_point = (i, j)
+                if self.out_map[i][j].isExit():
+                    self.exit_point = (i, j)
+        if self.origin_point is None or self.exit_point is None:
+            raise Exception("The map must have origin point and exit point")
 
 ###########
 # WARNING: make sure to use python 3.10
@@ -124,12 +124,12 @@ def map_loader(path: str) -> tuple[list[list[Case]],str,tuple[int, int], tuple[i
 
 # Class Jeu
 class Jeu:
-    def __init__(self, map):
+    def __init__(self, map: Map):
         self.PERIODE: float | int = 0.225 # actualise le jeu tout les Jeu.PERIODE secondes
-        self.grille: list[list[Case]] = map[0]
-        self.map_name = map[1]
-        self.origin_point = map[2]
-        self.exit_point = map[3]
+        self.grille: list[list[Case]] = map.out_map
+        self.map_name = map.name
+        self.origin_point = map.origin_point
+        self.exit_point = map.exit_point
         self.lemmings: list[Lemming] = [Lemming(self.origin_point[0], self.origin_point[1])]
         self.score = 0
     
@@ -178,7 +178,7 @@ class Jeu:
 
 game = None
 # Charge les maps et leurs noms
-maps = [map_loader(j) for j in ['./default_maps/' + i for i in listdir(path.abspath('./default_maps'))]]
+maps = [Map(j) for j in ['./default_maps/' + i for i in listdir(path.abspath('./default_maps'))]]
 names = '\n'.join([f'  {i}. ' + maps[i][1] for i in range(len(maps))])
 
 def main():
