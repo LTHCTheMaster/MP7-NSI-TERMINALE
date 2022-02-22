@@ -94,7 +94,7 @@ class Case:
 ###########
 # WARNING: make sure to use python 3.10
 ###########
-class Map:
+class Map_loaded:
     def __init__(self, path: str):
         # Charge une carte en chargeant sa grille, son nom et ses points d'entrée et de sortie
         self.out_map: list[list[Case]] = []
@@ -124,7 +124,7 @@ class Map:
 
 # Class Jeu
 class Jeu:
-    def __init__(self, map: Map):
+    def __init__(self, map: Map_loaded):
         self.PERIODE: float | int = 0.225 # actualise le jeu tout les Jeu.PERIODE secondes
         self.grille: list[list[Case]] = map.out_map
         self.map_name = map.name
@@ -178,8 +178,8 @@ class Jeu:
 
 game = None
 # Charge les maps et leurs noms
-maps = [Map(j) for j in ['./default_maps/' + i for i in listdir(path.abspath('./default_maps'))]]
-names = '\n'.join([f'  {i}. ' + maps[i][1] for i in range(len(maps))])
+maps = [Map_loaded(j) for j in ['./default_maps/' + i for i in listdir(path.abspath('./default_maps'))]]
+names = '\n'.join([f'  {i}. ' + maps[i].name for i in range(len(maps))])
 
 def main():
     global maps
