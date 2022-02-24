@@ -26,34 +26,30 @@ class Lemming:
     def avancer(self):
         try: # Gère les erreurs
             if game.grille[self.l][self.c+self.d].estLibre() and not game.grille[self.l][self.c+self.d].estObstruee(): # Condition qui vérifie que la case dans la direction dans laquelle doit aller le lemmings est libre et non obstruee
+                logger.write_log('Lemming: avancer()')
                 game.grille[self.l][self.c].liberer() # libere la case actuelle
                 game.grille[self.l][self.c+self.d].occuper(self) # occupe la nouvelle case
                 self.c += self.d # met a jour la colonne
-                logger.write_log('Lemming: avancer()')
             else:
                 self.retourner() # sinon le lemmings se retourne
-                logger.write_log('Lemming: avancer -> nope -> goto retourner')
         except:
             self.retourner() # si erreur, fallback sur "le lemmings se retourne"
-            logger.write_log('Lemming: avancer -> error -> goto retourner')
     
     def retourner(self):
-        self.d *= -1 # retourne le lemmings
         logger.write_log('Lemming: retourner()')
+        self.d *= -1 # retourne le lemmings
 
     def tomber(self):
         try: # Gère les erreurs
             if game.grille[self.l+1][self.c].estLibre() and not game.grille[self.l+1][self.c].estObstruee(): # Condition qui vérifie que la case dans laquelle doit tomber le lemmings est libre et non obstruee
+                logger.write_log('Lemming: tomber()')
                 game.grille[self.l][self.c].liberer() # libere la case actuelle
                 game.grille[self.l+1][self.c].occuper(self) # occupe la nouvelle case
                 self.l += 1 # met a jour la ligne
-                logger.write_log('Lemming: tomber()')
             else:
                 self.avancer() # sinon le lemmings avance
-                logger.write_log('Lemming: tomber -> nope -> goto avancer')
         except:
             self.avancer() # si erreur, fallback sur "le lemmings avance"
-            logger.write_log('Lemming: tomber -> error -> goto avancer')
     
     def __str__(self) -> str:
         # Gère l'affichage du lemmings
@@ -245,7 +241,7 @@ def main():
     # Charge uniquement la map voulue et décharge les autres et leur noms
     current_map = maps[map_wanted]
     logger = Logger_builder()
-    logger.write_log(f'INIT SEQUENCE: {map_wanted} choosen')
+    logger.write_log(f'INIT SEQUENCE: map {map_wanted} choosen')
     del maps
     del names
 
