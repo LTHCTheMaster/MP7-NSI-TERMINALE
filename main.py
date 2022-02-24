@@ -6,9 +6,11 @@
 # os for detect the os, clear the console window, and get all default maps
 from os import name, system, listdir, path
 # time to have a good framerate for the game and to respect the Jeu.PERIODE utilities mentionned in Lemmings.pdf
-from time import sleep
+from time import sleep, time
 # keyboard to detect key presses
 from keyboard import is_pressed
+# datetime to indicates time in logs
+from datetime import datetime
 
 ###########
 # WARNING: make sure to use python 3.10
@@ -27,13 +29,17 @@ class Lemming:
                 game.grille[self.l][self.c].liberer() # libere la case actuelle
                 game.grille[self.l][self.c+self.d].occuper(self) # occupe la nouvelle case
                 self.c += self.d # met a jour la colonne
+                logger.write_log('Lemming: avancer()')
             else:
                 self.retourner() # sinon le lemmings se retourne
+                logger.write_log('Lemming: avancer -> nope -> goto retourner')
         except:
             self.retourner() # si erreur, fallback sur "le lemmings se retourne"
+            logger.write_log('Lemming: avancer -> error -> goto retourner')
     
     def retourner(self):
         self.d *= -1 # retourne le lemmings
+        logger.write_log('Lemming: retourner()')
 
     def tomber(self):
         try: # Gère les erreurs
@@ -41,10 +47,13 @@ class Lemming:
                 game.grille[self.l][self.c].liberer() # libere la case actuelle
                 game.grille[self.l+1][self.c].occuper(self) # occupe la nouvelle case
                 self.l += 1 # met a jour la ligne
+                logger.write_log('Lemming: tomber()')
             else:
                 self.avancer() # sinon le lemmings avance
+                logger.write_log('Lemming: tomber -> nope -> goto avancer')
         except:
             self.avancer() # si erreur, fallback sur "le lemmings avance"
+            logger.write_log('Lemming: tomber -> error -> goto avancer')
     
     def __str__(self) -> str:
         # Gère l'affichage du lemmings
@@ -94,6 +103,32 @@ class Case:
 ###########
 # WARNING: make sure to use python 3.10
 ###########
+
+# Class Logger_builder
+class Logger_builder:
+    def __init__(self):
+        log_path = './logs.txt'
+        if not path.exists(path.abspath(log_path)):
+            self.file = open(path.abspath(log_path),'w')
+        else:
+            self.file = open(path.abspath(log_path),'r')
+            content = self.file.read()
+            self.close()
+            if content.count('New Logs at') >= 3:
+                self.file.open(path.abspath(log_path),'w')
+            else:
+                self.file.open(path.abspath(log_path),'a')
+            del content
+
+        self.file.write(f'New Logs at {datetime.fromtimestamp(time())}:\n')
+    
+    def write_log(self, message):
+        self.file.write(f'    {message}\n')
+    
+    def close(self):
+        self.file.close()
+
+# Class Map_loaded
 class Map_loaded:
     def __init__(self, path: str):
         # Charge une carte en chargeant sa grille, son nom et ses points d'entrée et de sortie
@@ -138,15 +173,22 @@ class Jeu:
             self.lemmings.append(Lemming(self.origin_point[0],self.origin_point[1]))
         # Calcul quels lemmings sont sortis
         copy_lem = []
+        counter_of_lemmings = 0
         for i in self.lemmings:
             if (i.l, i.c) == self.exit_point:
                 self.score += 1
                 self.grille[i.l][i.c].liberer()
+                logger.write_log(f'Jeu: Lemming {counter_of_lemmings} exit')
             else:
                 copy_lem.append(i)
+                logger.write_log(f'Jeu: Lemming {counter_of_lemmings} don\'t exit')
+            counter_of_lemmings += 1
         self.lemmings = copy_lem.copy()
+        counter_of_lemmings = 0
         for i in self.lemmings:
+            logger.write_log(f'Jeu: Lemming {counter_of_lemmings} action follow')
             i.tomber() # execute le comportement des lemmings: si peut tomber => tombe/ sinon => si peut avancer => avance/ sinon => se retourne
+            counter_of_lemmings += 1
         # nettoie la console en detectant l'os pour ne pas se tromper de commande
         if name == 'nt':
             system('cls')
@@ -170,6 +212,7 @@ class Jeu:
                 out.append(str(j))
             out.append('\n')
         out.append('\n\nScore: '+ str(self.score)+'\n')
+        logger.write_log('Jeu: Excute a Display')
         return ''.join(out)
 
 ###########
@@ -177,6 +220,7 @@ class Jeu:
 ###########
 
 game = None
+logger = None
 # Charge les maps et leurs noms
 maps = [Map_loaded(j) for j in ['./default_maps/' + i for i in listdir(path.abspath('./default_maps'))]]
 names = '\n'.join([f'  {i}. ' + maps[i].name for i in range(len(maps))])
@@ -185,6 +229,7 @@ def main():
     global maps
     global names
     global game
+    global logger
     # Prend le choix de map de l'utilisateur
     status = True
     while status:
@@ -196,6 +241,8 @@ def main():
             pass
     # Charge uniquement la map voulue et décharge les autres et leur noms
     current_map = maps[map_wanted]
+    logger = Logger_builder()
+    logger.write_log(f'INIT SEQUENCE: {map_wanted} choosen, map name: {names[map_wanted]}')
     del maps
     del names
 
@@ -208,6 +255,9 @@ def main():
         system('clear')
 
     game.demarrer()
+
+    logger.write_log(f'ENDING SEQUENCE: Game Ended with a score of {game.score}')
+    logger.close()
     return
 
 ###########
