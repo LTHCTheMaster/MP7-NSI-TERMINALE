@@ -245,7 +245,7 @@ def main():
     # Charge uniquement la map voulue et décharge les autres et leur noms
     current_map = maps[map_wanted]
     logger = Logger_builder()
-    logger.write_log(f'INIT SEQUENCE: {map_wanted} choosen, map name: {names[map_wanted]}')
+    logger.write_log(f'INIT SEQUENCE: {map_wanted} choosen')
     del maps
     del names
 
