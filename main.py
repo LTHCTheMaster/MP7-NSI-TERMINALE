@@ -107,7 +107,7 @@ class Case:
 # Class Logger_builder
 class Logger_builder:
     def __init__(self):
-        log_path = './logs.txt'
+        log_path = './logs.log'
         if not path.exists(path.abspath(log_path)):
             self.file = open(path.abspath(log_path),'w')
         else:
@@ -115,9 +115,9 @@ class Logger_builder:
             content = self.file.read()
             self.close()
             if content.count('New Logs at') >= 3:
-                self.file.open(path.abspath(log_path),'w')
+                self.file = open(path.abspath(log_path), 'w')
             else:
-                self.file.open(path.abspath(log_path),'a')
+                self.file = open(path.abspath(log_path), 'a')
             del content
 
         self.file.write(f'New Logs at {datetime.fromtimestamp(time())}:\n')
@@ -171,6 +171,7 @@ class Jeu:
     def timing(self):
         if is_pressed('plus'): # gère le spawn des lemmings
             self.lemmings.append(Lemming(self.origin_point[0],self.origin_point[1]))
+            logger.write_log('Jeu: summon a new Lemming')
         # Calcul quels lemmings sont sortis
         copy_lem = []
         counter_of_lemmings = 0
@@ -201,7 +202,9 @@ class Jeu:
         while not is_pressed('q'):
             sleep(self.PERIODE)
             self.timing()
+        logger.write_log('ENDING REQUIRED')
         input('')
+        logger.write_log('ENDING ACCEPTED')
         return
     
     def __str__(self) -> str:
