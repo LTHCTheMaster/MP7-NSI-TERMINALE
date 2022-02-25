@@ -5,7 +5,7 @@
 ## Imports
 # os for detect the os, clear the console window, and get all default maps
 from os import name, system, listdir, path
-# time to have a good framerate for the game and to respect the Jeu.PERIODE utilities mentionned in Lemmings.pdf
+# time to have a good framerate for the game and to respect the Jeu.PERIODE utilities mentionned in Lemmings.pdf and to write time in logs
 from time import sleep, time
 # keyboard to detect key presses
 from keyboard import is_pressed
